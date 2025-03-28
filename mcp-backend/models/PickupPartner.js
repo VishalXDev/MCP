@@ -1,10 +1,20 @@
-const mongoose = require("mongoose");
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
+const {
+  getPartners,
+  addPartner,
+  deletePartner
+} = require('../controllers/partnerController');
 
-const PickupPartnerSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    walletBalance: { type: Number, default: 0 },
-    status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
-});
+// Protect all routes with JWT authentication
+router.use(protect);
 
-module.exports = mongoose.model("PickupPartner", PickupPartnerSchema);
+router.route('/')
+  .get(getPartners)    // GET /api/partners
+  .post(addPartner);   // POST /api/partners
+
+router.route('/:id')
+  .delete(deletePartner); // DELETE /api/partners/:id
+
+module.exports = router;

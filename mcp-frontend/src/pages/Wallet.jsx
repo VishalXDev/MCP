@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from "react";
-import axios from "../services/api";
+import React, { useEffect, useState } from "react";
 
 const Wallet = () => {
-  const [balance, setBalance] = useState(0);
+  const [walletData, setWalletData] = useState(null);
 
   useEffect(() => {
-    axios.get("/mcp/wallet")
-      .then(res => setBalance(res.data.balance))
-      .catch(err => console.error("Error fetching wallet balance:", err));
+    fetch("http://localhost:5000/mcp/wallet")
+      .then((res) => res.json())
+      .then((data) => setWalletData(data))
+      .catch((error) => console.error("Error fetching wallet:", error));
   }, []);
 
   return (
-    <div className="card">
-      <h3>Wallet Balance</h3>
-      <p>₹{balance}</p>
-      <button>Add Funds</button>
+    <div>
+      <h2>Wallet</h2>
+      {walletData ? (
+        <div>
+          <p>Balance: ₹{walletData.balance}</p>
+          <h3>Transactions</h3>
+          <ul>
+            {walletData.transactions.map((txn, index) => (
+              <li key={index}>{txn}</li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

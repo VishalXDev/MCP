@@ -7,11 +7,16 @@ const {
   deletePartner
 } = require('../controllers/partnerController');
 
-router.route('/')
-  .get(protect, getPartners)
-  .post(protect, addPartner);
+// All routes will require authentication
+router.use(protect);
 
-router.route('/:id')
-  .delete(protect, deletePartner);
+// GET /api/partners
+router.get('/', getPartners);
+
+// POST /api/partners
+router.post('/', addPartner);
+
+// DELETE /api/partners/:id
+router.delete('/:id', deletePartner);
 
 module.exports = router;

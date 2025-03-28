@@ -1,42 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { GoogleMap, Marker, DirectionsRenderer, useJsApiLoader } from "@react-google-maps/api";
+import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
+import { useMemo } from "react";
 
-const containerStyle = { width: "100%", height: "500px" };
-
-const MapView = ({ center, orders, partners }) => {
-  const { isLoaded } = useJsApiLoader({
+const MapView = ({ latitude = 28.6139, longitude = 77.2090 }) => {
+  const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
   });
 
-  const [directions, setDirections] = useState(null);
+  const center = useMemo(() => ({ lat: latitude, lng: longitude }), [latitude, longitude]);
 
-  useEffect(() => {
-    if (orders.length > 0) {
-      const directionsService = new window.google.maps.DirectionsService();
-      const { pickup, dropoff } = orders[0];
+  const mapContainerStyle = useMemo(() => ({ width: "100%", height: "400px" }), []);
 
-      directionsService.route(
-        { origin: pickup, destination: dropoff, travelMode: "DRIVING" },
-        (result, status) => {
-          if (status === "OK") setDirections(result);
-          else console.error("Error fetching directions", status);
-        }
-      );
-    }
-  }, [orders]);
+  if (loadError) return <div>⚠️ Error loading Google Maps</div>;
+  if (!isLoaded) return <div>🗺️ Loading Map...</div>;
 
-  return isLoaded ? (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
-      {partners && Object.entries(partners).map(([id, loc]) => (
-        <Marker key={id} position={loc} label="P" />
-      ))}
-      {orders.map((order, index) => (
-        <Marker key={index} position={order.pickup} label="O" />
-      ))}
-      {directions && <DirectionsRenderer directions={directions} />}
+  return (
+    <GoogleMap zoom={14} center={center} mapContainerStyle={mapContainerStyle}>
+      <Marker position={center} />
     </GoogleMap>
-  ) : (
-    <p>Loading map...</p>
   );
 };
 
