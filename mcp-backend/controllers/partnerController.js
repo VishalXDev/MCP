@@ -1,28 +1,49 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../utils/auth');
+const { sendEmail } = require('../utils/email'); // Assume you have an email utility
+const { ROLES } = require('../constants/role'); // For role management
 
-// @desc    Get all pickup partners
+// @desc    Get all pickup partners with pagination
 // @route   GET /api/partners
 // @access  Private (MCP only)
 exports.getPartners = async (req, res) => {
   try {
-    // Get partners that belong to the current MCP
-    const partners = await User.find({ 
-      role: 'pickup_partner',
+    const { page = 1, limit = 10, status } = req.query;
+    const filter = { 
+      role: ROLES.PICKUP_PARTNER,
       mcpId: req.user.id 
-    }).select('-password');
-    
+    };
+
+    if (status) filter.status = status;
+
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      select: '-password -__v',
+      sort: { createdAt: -1 }
+    };
+
+    const partners = await User.paginate(filter, options);
+
     res.status(200).json({
       success: true,
-      count: partners.length,
-      data: partners
+      data: {
+        partners: partners.docs,
+        pagination: {
+          total: partners.totalDocs,
+          pages: partners.totalPages,
+          page: partners.page,
+          limit: partners.limit
+        }
+      }
     });
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching partners:', err);
     res.status(500).json({ 
       success: false,
-      error: 'Server error' 
+      message: 'Failed to fetch partners',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
@@ -32,82 +53,138 @@ exports.getPartners = async (req, res) => {
 // @access  Private (MCP only)
 exports.addPartner = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, vehicleType } = req.body;
 
-    // Check if partner already exists
-    let partner = await User.findOne({ email });
-    if (partner) {
+    // Validate required fields
+    if (!name || !email || !phone) {
       return res.status(400).json({
         success: false,
-        error: 'Partner already exists'
+        message: 'Name, email and phone are required fields'
       });
     }
 
-    // Create temp password
-    const tempPassword = Math.random().toString(36).slice(-8);
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
+
+    // Check if partner already exists
+    const existingPartner = await User.findOne({ email });
+    if (existingPartner) {
+      return res.status(409).json({
+        success: false,
+        message: 'Partner with this email already exists'
+      });
+    }
+
+    // Generate temp password and hash
+    const tempPassword = Math.random().toString(36).slice(-8) + 'A1!'; // Stronger temp password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
 
     // Create partner
-    partner = new User({
+    const partner = new User({
       name,
       email,
       phone,
       password: hashedPassword,
-      role: 'pickup_partner',
-      mcpId: req.user.id
+      role: ROLES.PICKUP_PARTNER,
+      mcpId: req.user.id,
+      status: 'active',
+      vehicleType,
+      createdAt: new Date()
     });
 
     await partner.save();
 
-    // TODO: Send email with temp password here
+    // Send welcome email with temp password
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to MCP System',
+        text: `Your temporary password is: ${tempPassword}\nPlease change it after first login.`,
+        html: `<p>Your temporary password is: <strong>${tempPassword}</strong></p><p>Please change it after first login.</p>`
+      });
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Continue even if email fails
+    }
 
     res.status(201).json({
       success: true,
+      message: 'Partner created successfully',
       data: {
         _id: partner._id,
         name: partner.name,
         email: partner.email,
         phone: partner.phone,
-        role: partner.role
+        role: partner.role,
+        status: partner.status,
+        vehicleType: partner.vehicleType
       }
     });
+
   } catch (err) {
-    console.error(err);
+    console.error('Error adding partner:', err);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Failed to create partner',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
 
-// @desc    Delete pickup partner
+// @desc    Delete or deactivate pickup partner
 // @route   DELETE /api/partners/:id
 // @access  Private (MCP only)
 exports.deletePartner = async (req, res) => {
   try {
-    const partner = await User.findOneAndDelete({
-      _id: req.params.id,
-      mcpId: req.user.id,
-      role: 'pickup_partner'
+    // First check if partner has pending orders
+    const hasActiveOrders = await Order.exists({
+      partnerId: req.params.id,
+      status: { $in: ['pending', 'assigned', 'in_progress'] }
     });
+
+    if (hasActiveOrders) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete partner with active orders'
+      });
+    }
+
+    // Soft delete by marking as inactive instead of actual deletion
+    const partner = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        mcpId: req.user.id,
+        role: ROLES.PICKUP_PARTNER
+      },
+      { status: 'inactive', deactivatedAt: new Date() },
+      { new: true, select: '-password' }
+    );
 
     if (!partner) {
       return res.status(404).json({
         success: false,
-        error: 'Partner not found'
+        message: 'Partner not found or unauthorized'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: {}
+      message: 'Partner deactivated successfully',
+      data: partner
     });
+
   } catch (err) {
-    console.error(err);
+    console.error('Error deleting partner:', err);
     res.status(500).json({
       success: false,
-      error: 'Server error'
+      message: 'Failed to deactivate partner',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };

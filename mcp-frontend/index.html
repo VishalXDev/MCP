@@ -1,19 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MCP Dashboard - Manage orders and transactions seamlessly." />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    
-    <title>MCP Dashboard</title>
-    
-    <link rel="icon" type="image/x-icon" href="./src/assets/react.svg" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx" defer></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <a href="#" class="active">Home</a>
+        <a href="#">Analytics</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+        <button id="darkModeToggle">🌙 Dark Mode</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Welcome to Your Dashboard</h1>
+        <p>Track your statistics and performance here.</p>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Users</h3>
+                <p>1,230</p>
+            </div>
+            <div class="card">
+                <h3>Revenue</h3>
+                <p>$24,500</p>
+            </div>
+            <div class="card">
+                <h3>Orders</h3>
+                <p>3,280</p>
+            </div>
+            <div class="card">
+                <h3>Feedback</h3>
+                <p>95%</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>

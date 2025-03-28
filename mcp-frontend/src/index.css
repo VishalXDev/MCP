@@ -5,115 +5,82 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  outline: none;
 }
 
-body, html {
+body {
   font-family: "Poppins", sans-serif;
-  background-color: #f5f7fa;
+  background: #f0f2f5;
   color: #333;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background: #181818;
+  color: #ddd;
+}
+
+/* ===============================
+   Sidebar Navigation
+=============================== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
   height: 100%;
-}
-
-/* ===============================
-     Header
-=============================== */
-header {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: white;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* ===============================
-     Navigation Bar
-=============================== */
-nav {
-  background: white;
+  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
   display: flex;
-  justify-content: center;
-  padding: 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-nav a {
-  margin: 5px 15px;
+.sidebar a {
   text-decoration: none;
-  font-weight: bold;
-  color: #007bff;
+  color: #333;
   font-size: 18px;
-  padding: 10px 15px;
+  font-weight: 600;
+  margin: 15px 0;
+  padding: 10px;
   border-radius: 8px;
-  transition: background 0.3s ease, transform 0.2s ease-in-out;
+  transition: 0.3s;
 }
 
-nav a:hover {
-  background: rgba(0, 123, 255, 0.2);
-  transform: scale(1.05);
-}
-
-nav a.active {
+.sidebar a:hover,
+.sidebar a.active {
   background: #007bff;
   color: white;
 }
 
 /* ===============================
-     Main Content Area
+   Main Content
 =============================== */
-main {
-  padding: 25px;
-  max-width: 1100px;
-  margin: auto;
-}
-
-/* ===============================
-     Dashboard Container
-=============================== */
-.dashboard-container {
-  text-align: center;
-  background: white;
-  color: #181818;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+.main-content {
+  margin-left: 270px;
   padding: 30px;
-  border-radius: 15px;
-  margin: auto;
 }
 
 /* ===============================
-     Dashboard Grid (Spacing & Layout)
+   Dashboard Cards
 =============================== */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  justify-content: center;
-  align-items: stretch;
-  margin-top: 20px;
+  gap: 20px;
 }
 
-/* ===============================
-     Dashboard Cards (Modern Look)
-=============================== */
 .card {
   background: white;
-  padding: 30px;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  text-align: center;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  margin: 20px;
+  transition: transform 0.3s ease-in-out;
 }
 
 .card:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .card h3 {
@@ -128,91 +95,45 @@ main {
 }
 
 /* ===============================
-     Order List Styling
-=============================== */
-.order-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-}
-
-.order-item {
-  background: #007bff;
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-size: 18px;
-  transition: transform 0.3s ease-in-out;
-}
-
-.order-item:hover {
-  transform: scale(1.03);
-}
-
-/* ===============================
-     Buttons (Modern Look)
+   Buttons
 =============================== */
 button {
   padding: 12px 18px;
   border: none;
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: #007bff;
   color: white;
   font-size: 16px;
   cursor: pointer;
-  margin-top: 10px;
   border-radius: 8px;
   font-weight: bold;
-  transition: background 0.3s ease, transform 0.2s ease-in-out;
+  transition: background 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background: linear-gradient(135deg, #0056b3, #003f88);
+  background: #0056b3;
   transform: scale(1.05);
 }
 
 /* ===============================
-     Utility Classes
-=============================== */
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.text-bold {
-  font-weight: bold;
-}
-
-.mt-20 {
-  margin-top: 20px;
-}
-
-/* ===============================
-     Responsive Design
+   Responsive Design
 =============================== */
 @media (max-width: 768px) {
-  .app-container {
-    padding: 15px;
+  .sidebar {
+    width: 80px;
+    padding: 10px;
   }
 
-  nav {
-    flex-direction: column;
+  .sidebar a {
+    font-size: 14px;
     text-align: center;
+    padding: 5px;
   }
-  
-  nav a {
-    display: block;
-    margin: 10px auto;
+
+  .main-content {
+    margin-left: 100px;
   }
 
   .dashboard-grid {
     grid-template-columns: 1fr;
-  }
-
-  .card {
-    margin: 15px auto;
-    padding: 20px;
   }
 }
