@@ -2,23 +2,29 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "../services/api";
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_API_BASE_URL);
+const socket = io(import.meta.env.VITE_API_BASE_URL, { autoConnect: false });
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
-  const [error, setError] = useState(""); 
-  const isMounted = useRef(true); // Prevent memory leaks
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const isMounted = useRef(true);
 
   useEffect(() => {
     isMounted.current = true;
+    socket.connect();
 
     const fetchOrders = async () => {
       try {
         const res = await axios.get("/orders-with-locations");
-        if (isMounted.current) setOrders(res.data);
+        if (isMounted.current) {
+          setOrders(res.data);
+          setLoading(false);
+        }
       } catch (err) {
         if (isMounted.current) {
           setError(err.response?.data?.message || "Failed to fetch orders.");
+          setLoading(false);
         }
       }
     };
@@ -26,13 +32,13 @@ const Orders = () => {
     fetchOrders();
 
     const handleOrderUpdate = (data) => {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === data.orderId && order.status !== data.status
-            ? { ...order, status: data.status }
-            : order
-        )
-      );
+      if (isMounted.current) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === data.orderId ? { ...order, status: data.status } : order
+          )
+        );
+      }
     };
 
     socket.on("orderStatusUpdate", handleOrderUpdate);
@@ -40,7 +46,7 @@ const Orders = () => {
     return () => {
       isMounted.current = false;
       socket.off("orderStatusUpdate", handleOrderUpdate);
-      socket.disconnect(); // Ensure socket is properly closed
+      socket.disconnect();
     };
   }, []);
 
@@ -48,15 +54,18 @@ const Orders = () => {
     Completed: "green",
     Pending: "yellow",
     Processing: "blue",
+    Canceled: "red",
   };
 
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Order Status</h2>
 
-      {error && <p className="text-red-500">{error}</p>}
-
-      {orders.length === 0 ? (
+      {loading ? (
+        <p className="text-gray-500">Loading orders...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : orders.length === 0 ? (
         <p className="text-gray-500">No orders available.</p>
       ) : (
         <ul className="space-y-4">

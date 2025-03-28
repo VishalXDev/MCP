@@ -11,13 +11,13 @@ body {
   font-family: "Poppins", sans-serif;
   background: #f0f2f5;
   color: #333;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Dark Mode */
 body.dark-mode {
-  background: #181818;
-  color: #ddd;
+  background: #121212;
+  color: #e0e0e0;
 }
 
 /* ===============================
@@ -27,39 +27,58 @@ body.dark-mode {
   position: fixed;
   left: 0;
   top: 0;
-  width: 250px;
+  width: 260px;
   height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
   padding: 20px;
-  box-shadow: 3px 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
+  transition: width 0.3s ease-in-out;
 }
 
 .sidebar a {
   text-decoration: none;
-  color: #333;
+  color: #222;
   font-size: 18px;
   font-weight: 600;
-  margin: 15px 0;
-  padding: 10px;
+  margin: 12px 0;
+  padding: 12px;
   border-radius: 8px;
-  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.3s ease-in-out, color 0.3s;
 }
 
 .sidebar a:hover,
 .sidebar a.active {
   background: #007bff;
-  color: white;
+  color: #fff;
+}
+
+/* Sidebar for Dark Mode */
+body.dark-mode .sidebar {
+  background: rgba(30, 30, 30, 0.8);
+}
+
+body.dark-mode .sidebar a {
+  color: #e0e0e0;
+}
+
+body.dark-mode .sidebar a:hover,
+body.dark-mode .sidebar a.active {
+  background: #0056b3;
 }
 
 /* ===============================
    Main Content
 =============================== */
 .main-content {
-  margin-left: 270px;
+  margin-left: 280px;
   padding: 30px;
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* ===============================
@@ -72,26 +91,42 @@ body.dark-mode {
 }
 
 .card {
-  background: white;
+  background: #fff;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
 .card h3 {
   color: #007bff;
   margin-bottom: 15px;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .card p {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
+  color: #444;
+}
+
+/* Dark Mode Cards */
+body.dark-mode .card {
+  background: #1e1e1e;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .card h3 {
+  color: #4da6ff;
+}
+
+body.dark-mode .card p {
+  color: #bbb;
 }
 
 /* ===============================
@@ -100,23 +135,37 @@ body.dark-mode {
 button {
   padding: 12px 18px;
   border: none;
-  background: #007bff;
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   font-size: 16px;
   cursor: pointer;
   border-radius: 8px;
   font-weight: bold;
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s ease, transform 0.2s ease-in-out;
 }
 
 button:hover {
-  background: #0056b3;
+  background: linear-gradient(135deg, #0056b3, #004080);
   transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
 }
 
 /* ===============================
    Responsive Design
 =============================== */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    margin-left: 220px;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 80px;
@@ -126,7 +175,7 @@ button:hover {
   .sidebar a {
     font-size: 14px;
     text-align: center;
-    padding: 5px;
+    padding: 8px;
   }
 
   .main-content {
@@ -135,5 +184,21 @@ button:hover {
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 60px;
+  }
+
+  .sidebar a {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .main-content {
+    margin-left: 80px;
+    padding: 20px;
   }
 }
